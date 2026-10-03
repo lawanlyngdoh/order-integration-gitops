@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: order-dev
+
+resources:
+  - ../../base
+  - namespace.yaml
+
+images:
+  - name: ghcr.io/lawanlyngdoh/order-integration-service
+    digest: sha256:4c654872e1f578f086aefcbd6799b5321b445cf424321537cf038b439865ac7f
+
+configMapGenerator:
+  - name: order-integration-config
+    literals:
+      - DOWNSTREAM_ORDER_URL=http://mock-order-api:8080
+      - ENVIRONMENT=dev
