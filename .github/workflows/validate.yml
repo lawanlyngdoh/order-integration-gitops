@@ -1,0 +1,46 @@
+name: GitOps CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gitops-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Kubernetes manifests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v5
+        with:
+          version: v1.35.8
+
+      - name: Render and validate environment policies
+        run: ./scripts/validate-manifests.sh
+
+      - name: Validate Kubernetes schemas
+        run: |
+          docker run \
+            --rm \
+            --volume "${GITHUB_WORKSPACE}:/workspace:ro" \
+            ghcr.io/yannh/kubeconform:v0.8.0 \
+            -strict \
+            -summary \
+            -exit-on-error \
+            /workspace/.rendered
