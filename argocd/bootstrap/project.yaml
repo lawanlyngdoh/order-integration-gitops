@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: order-integration
+  namespace: argocd
+spec:
+  description: Order integration deployment project
+
+  sourceRepos:
+    - https://github.com/lawanlyngdoh/order-integration-gitops.git
+
+  destinations:
+    - namespace: order-dev
+      server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
