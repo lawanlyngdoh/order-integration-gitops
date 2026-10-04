@@ -1,0 +1,98 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: order-integration-smoke-test
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 120
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: order-integration-smoke-test
+        app.kubernetes.io/component: test
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: smoke-test
+          image: ghcr.io/lawanlyngdoh/order-integration-service
+
+          command:
+            - python
+            - -c
+            - |
+              import json
+              import urllib.request
+
+              payload = {
+                  "order_id": "ARGO-SMOKE-001",
+                  "customer_id": "CUS-SMOKE-001",
+                  "items": [
+                      {
+                          "sku": "TEST-SKU",
+                          "quantity": 1,
+                          "unit_price": "1.00"
+                      }
+                  ],
+                  "shipping_address": {
+                      "line1": "1 GitOps Street",
+                      "city": "Shillong",
+                      "postal_code": "793001",
+                      "country_code": "IN"
+                  }
+              }
+
+              request = urllib.request.Request(
+                  "http://order-integration/orders",
+                  data=json.dumps(payload).encode(),
+                  headers={
+                      "Content-Type": "application/json",
+                      "X-Correlation-ID": "argocd-smoke-test"
+                  },
+                  method="POST"
+              )
+
+              with urllib.request.urlopen(request, timeout=10) as response:
+                  body = json.loads(response.read())
+
+                  assert response.status == 202, body
+                  assert body["status"] == "accepted", body
+                  assert body["correlation_id"] == "argocd-smoke-test", body
+
+                  print(json.dumps(body))
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          volumeMounts:
+            - name: temporary-files
+              mountPath: /tmp
+
+      volumes:
+        - name: temporary-files
+          emptyDir:
+            sizeLimit: 16Mi
