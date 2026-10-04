@@ -9,7 +9,7 @@ resources:
 
 images:
   - name: ghcr.io/lawanlyngdoh/order-integration-service
-    digest: sha256:4c654872e1f578f086aefcbd6799b5321b445cf424321537cf038b439865ac7f
+    digest: sha256:d93c2f41098eb1d978aad19a8713f36f109d4619fc7b8a03905d9ecd340ace2f
 
 configMapGenerator:
   - name: order-integration-config
