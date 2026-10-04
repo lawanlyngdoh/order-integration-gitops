@@ -22,7 +22,6 @@ spec:
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
-      - ApplyOutOfSyncOnly=true
       - PruneLast=true
 
   revisionHistoryLimit: 10
