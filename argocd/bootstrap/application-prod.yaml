@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: order-integration-prod
+  namespace: argocd
+spec:
+  project: order-integration
+
+  source:
+    repoURL: https://github.com/lawanlyngdoh/order-integration-gitops.git
+    targetRevision: production
+    path: environments/prod
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: order-prod
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+
+  revisionHistoryLimit: 10
