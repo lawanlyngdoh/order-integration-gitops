@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/lawanlyngdoh/order-integration-gitops.git
     targetRevision: main
-    path: apps/order-integration/overlays/dev
+    path: environments/dev
 
   destination:
     server: https://kubernetes.default.svc
