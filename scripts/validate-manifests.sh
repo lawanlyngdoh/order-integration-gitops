@@ -10,7 +10,7 @@ mkdir -p "${output_directory}"
 environments=(dev test prod)
 
 for environment in "${environments[@]}"; do
-    overlay="${repository_root}/apps/order-integration/overlays/${environment}"
+    overlay="${repository_root}/environments/${environment}"
     rendered_manifest="${output_directory}/${environment}.yaml"
     namespace="order-${environment}"
 
@@ -21,7 +21,14 @@ for environment in "${environments[@]}"; do
     if ! grep -Eq \
         'image: ghcr.io/lawanlyngdoh/order-integration-service@sha256:[0-9a-f]{64}$' \
         "${rendered_manifest}"; then
-        echo "${environment}: image is not pinned to a SHA-256 digest"
+        echo "${environment}: order service image is not pinned to a SHA-256 digest"
+        exit 1
+    fi
+
+    if ! grep -Eq \
+        'image: wiremock/wiremock@sha256:[0-9a-f]{64}$' \
+        "${rendered_manifest}"; then
+        echo "${environment}: WireMock image is not pinned to a SHA-256 digest"
         exit 1
     fi
 
@@ -37,17 +44,17 @@ for environment in "${environments[@]}"; do
 done
 
 if ! grep -q "replicas: 1" "${output_directory}/dev.yaml"; then
-    echo "dev: expected one replica"
+    echo "dev: expected one order-service replica"
     exit 1
 fi
 
 if ! grep -q "replicas: 1" "${output_directory}/test.yaml"; then
-    echo "test: expected one replica"
+    echo "test: expected one order-service replica"
     exit 1
 fi
 
 if ! grep -q "replicas: 2" "${output_directory}/prod.yaml"; then
-    echo "prod: expected two replicas"
+    echo "prod: expected two order-service replicas"
     exit 1
 fi
 
