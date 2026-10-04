@@ -10,11 +10,14 @@ spec:
     - https://github.com/lawanlyngdoh/order-integration-gitops.git
 
   destinations:
-  - namespace: order-dev
-    server: https://kubernetes.default.svc
+    - namespace: order-dev
+      server: https://kubernetes.default.svc
 
-  - namespace: order-test
-    server: https://kubernetes.default.svc
+    - namespace: order-test
+      server: https://kubernetes.default.svc
+
+    - namespace: order-prod
+      server: https://kubernetes.default.svc
 
   clusterResourceWhitelist:
     - group: ""

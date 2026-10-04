@@ -5,3 +5,4 @@ resources:
   - project.yaml
   - application-dev.yaml
   - application-test.yaml
+  - application-prod.yaml
